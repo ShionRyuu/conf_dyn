@@ -1,0 +1,9 @@
+# ext
+*.beam
+*.iml
+
+# dir
+.idea
+.eunit
+.rebar
+ebin
