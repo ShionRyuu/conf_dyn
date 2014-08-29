@@ -1,6 +1,6 @@
 #conf_dyn - dynamic config generate
 
-[![Build Status](https://secure.travis-ci.org/genesislive/Sep.png?branch=master)](http://travis-ci.org/genesislive/Sep)
+[![Build Status](https://secure.travis-ci.org/genesislive/conf_dyn.png?branch=master)](http://travis-ci.org/genesislive/conf_dyn)
 
 conf_dyn use dynamic_compile to generate beam file from erlang consult file.
 
