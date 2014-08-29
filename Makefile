@@ -14,7 +14,7 @@ deps:
 	@test -d deps || $(REBAR) get-deps
 
 test: compile
-	$(REBAR) eunit   
+	ERL_AFLAGS="-root_dir `pwd`" $(REBAR) eunit   
     
 clean:
 	$(REBAR) clean
