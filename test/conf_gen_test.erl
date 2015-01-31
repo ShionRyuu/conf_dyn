@@ -1,8 +1,7 @@
 %% -------------------------------------------------------------------
-%%
 %% conf_dyn - dynamic config generate
 %%
-%% Copyright (c) 2014 Shion Ryuu (genesislive@outlook.com)
+%% Copyright (c) 2014-2015 Shion Ryuu (shionryuu@outlook.com)
 %%
 %% Permission is hereby granted, free of charge, to any person obtaining a copy
 %% of this software and associated documentation files (the "Software"), to deal
