@@ -3,7 +3,8 @@
 *.iml
 
 # dir
-.idea
-.eunit
-.rebar
-ebin
+/.idea
+/.eunit
+/.rebar
+/ebin
+/deps

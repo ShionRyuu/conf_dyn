@@ -21,13 +21,37 @@
 %% OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 %% THE SOFTWARE.
 %% -------------------------------------------------------------------
+-module(conf_util).
 -author("Ryuu").
 
--define(FOREACH(Fun, List), lists:foreach(fun(E) -> Fun(E) end, List)).
--define(CONF_FIND(Conf, Key), Conf:get(Key)).
+%% API
+-export([
+    get_config_path/1,
+    get_beam_path/1,
+    get_conf_map/0
+]).
 
-%% @doc 格式{配置名, 配置路径, 格式[kv_con, kv_list, rec_con, rec_list]}
--record(conf_map, {name, path, type = kv_con}).
+%% @doc 配置文件目录
+get_config_dir() ->
+    application:get_env(conf_dyn, conf_dir).
 
-%% @doc 配置{配置存放路径}
--record(config, {conf_dir, beam_dir}).
+%% @doc 配置文件路径
+get_config_path(RelPath) ->
+    ConfDir = get_config_dir(),
+    filename:join([ConfDir, RelPath]).
+
+%% @doc .beam文件目录
+get_beam_dir() ->
+    application:get_env(conf_dyn, beam_dir).
+
+%% @doc .beam文件路径
+get_beam_path(ConfName) ->
+    BeamDir = get_beam_dir(),
+    filename:join([BeamDir, erlang:atom_to_list(ConfName) ++ ".beam"]).
+
+%% @doc 配置映射表([{mora, "mora.config", kv_con}])
+get_conf_map() ->
+    case application:get_env(conf_dyn, beam_dir) of
+        L when is_list(L) -> L;
+        _ -> []
+    end.

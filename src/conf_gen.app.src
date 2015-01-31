@@ -1,7 +1,0 @@
-{application, conf_gen, [
-    {description, "Config Dynamic Generator"},
-    {vsn, "0.0.1"},
-	{env, [{root_dir, "d:/Workspace/Erlang/conf_gen"}]},
-    {applications, [kernel, stdlib]},
-    {registered, [sep]}
-]}.

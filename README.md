@@ -1,6 +1,6 @@
 #conf_dyn - dynamic config generate
 
-[![Build Status](https://secure.travis-ci.org/genesislive/conf_dyn.png?branch=master)](http://travis-ci.org/genesislive/conf_dyn)
+[![Build Status](https://secure.travis-ci.org/ShionRyuu/conf_dyn.png?branch=master)](http://travis-ci.org/ShionRyuu/conf_dyn)
 
 conf_dyn use dynamic_compile to generate beam file from erlang consult file.
 
@@ -53,7 +53,7 @@ $ERL_FLAGS="-pa ./ebin -pa ./deps/*/ebin -root_dir `pwd`" rebar compile eunit
 
 ## Authors
 
-- Shion Ryuu <genesislive@outlook.com>
+- Shion Ryuu <shionryuu@outlook.com>
 
 ## Todo
 
