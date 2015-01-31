@@ -26,6 +26,7 @@
 
 %% API
 -export([
+    get_config_dir/0,
     get_config_path/1,
     get_beam_path/1,
     get_conf_map/0
@@ -33,7 +34,10 @@
 
 %% @doc 配置文件目录
 get_config_dir() ->
-    application:get_env(conf_dyn, conf_dir).
+    case application:get_env(conf_dyn, conf_dir) of
+        {ok, Path} -> Path;
+        _ -> "."
+    end.
 
 %% @doc 配置文件路径
 get_config_path(RelPath) ->
@@ -42,16 +46,19 @@ get_config_path(RelPath) ->
 
 %% @doc .beam文件目录
 get_beam_dir() ->
-    application:get_env(conf_dyn, beam_dir).
+    case application:get_env(conf_dyn, beam_dir) of
+        {ok, Path} -> Path;
+        _ -> "."
+    end.
 
 %% @doc .beam文件路径
 get_beam_path(ConfName) ->
     BeamDir = get_beam_dir(),
     filename:join([BeamDir, erlang:atom_to_list(ConfName) ++ ".beam"]).
 
-%% @doc 配置映射表([{mora, "mora.config", kv_con}])
+%% @doc 配置映射表
 get_conf_map() ->
-    case application:get_env(conf_dyn, beam_dir) of
-        L when is_list(L) -> L;
+    case application:get_env(conf_dyn, conf_map) of
+        {ok, L} when is_list(L) -> L;
         _ -> []
     end.

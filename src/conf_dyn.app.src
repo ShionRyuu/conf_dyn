@@ -1,10 +1,13 @@
 {application, conf_dyn, [
     {description, "Dynamic Config Generator"},
-    {vsn, "0.0.1"},
+    {vsn, "0.0.2"},
 	{env, [
         {root_dir, "."},
         {conf_dir, "config"},
-        {beam_dir, "ebin"}
+        {beam_dir, "ebin"},
+        {conf_map, [
+            {mora, "mora.config", kv_con}
+        ]}
     ]},
     {applications, [kernel, stdlib]},
     {registered, [conf_dyn]}

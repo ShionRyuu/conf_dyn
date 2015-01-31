@@ -38,6 +38,10 @@
     reload_changed_parallel/0
 ]).
 
+%% ====================================================================
+%% Helper Functions
+%% ====================================================================
+
 %% @doc 获取配置
 find(Conf, Key) ->
     case Conf:get(Key) of
@@ -56,19 +60,26 @@ list(Conf) ->
             V
     end.
 
+%% ====================================================================
+%% Reload Functions
+%% ====================================================================
+
 %% @doc 生成所有配置文件
 reload_all() ->
+    load_conf_dyn_app(),
     Maps = get_config_maps(),
     ?FOREACH(fun conf_gen:generate_file/1, Maps),
     ok.
 
 %% @doc 并行生成所有配置文件
 reload_parallel() ->
+    load_conf_dyn_app(),
     Maps = get_config_maps(),
     conf_gen:parallel_generate(Maps).
 
 %% @doc 生成一个
 reload_config(ConfName) ->
+    load_conf_dyn_app(),
     Maps = get_config_maps(),
     case lists:keyfind(ConfName, #conf_map.name, Maps) of
         #conf_map{} = Map ->
@@ -79,12 +90,14 @@ reload_config(ConfName) ->
 
 %% @doc 仅生成有变化的配置文件
 reload_changed() ->
+    load_conf_dyn_app(),
     Maps = get_changed_maps(),
     ?FOREACH(fun conf_gen:generate_file/1, Maps),
     ok.
 
 %% @doc 并行生成所有配置文件
 reload_changed_parallel() ->
+    load_conf_dyn_app(),
     Maps = get_changed_maps(),
     conf_gen:parallel_generate(Maps).
 
@@ -92,6 +105,10 @@ reload_changed_parallel() ->
 %% ====================================================================
 %% Local Functions
 %% ====================================================================
+
+%% @doc
+load_conf_dyn_app() ->
+    _ = application:load(conf_dyn).
 
 %% @doc 获取所有的配置文件列表
 get_config_maps() ->
