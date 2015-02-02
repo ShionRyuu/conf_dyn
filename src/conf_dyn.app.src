@@ -2,12 +2,13 @@
     {description, "Dynamic Config Generator"},
     {vsn, "1.0"},
 	{env, [
-        {root_dir, "."},
+        {root_dir, "."}, %% absolute path
         {conf_dir, "config"},
         {beam_dir, "ebin"},
         {src_dir, "src"},
         {conf_map, [
-            {filter, "filter.config", kv_con}
+            {filter, "filter.config", kv_con},
+            {mora, "mora.config", kv_con}
         ]}
     ]},
     {applications, [kernel, stdlib]},

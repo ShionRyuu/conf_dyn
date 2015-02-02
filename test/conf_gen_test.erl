@@ -32,7 +32,8 @@
 -include_lib("eunit/include/eunit.hrl").
 
 conf_gen_test() ->
-    ?assertEqual(conf_dyn:reload_config(mora), ok),
+    %% run in .eunit
+    %%?assertEqual(conf_dyn:reload_config(mora), ok),
     ?assertEqual(mora:get(invite_times), 5),
     ?assertEqual(mora:get(gain_times), 10),
     ?assertEqual(mora:get(not_exist_key), undefined),

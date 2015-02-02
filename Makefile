@@ -5,7 +5,7 @@ REBAR=$(PWD)/rebar
 all: compile config
 
 config:
-	@erl -noshell -pa ./ebin -pa ./deps/*/ebin -root_dir "`pwd`" -s conf_dyn reload_all -s init stop
+	@erl -noshell -pa ./ebin -pa ./deps/*/ebin -s conf_dyn reload_all -s init stop
 
 compile: deps
 	$(REBAR) compile
@@ -13,8 +13,8 @@ compile: deps
 deps:
 	@test -d deps || $(REBAR) get-deps
 
-test: compile
-	ERL_AFLAGS="-root_dir `pwd`" $(REBAR) eunit   
+test: compile config
+	ERL_AFLAGS="-pa ./ebin ./deps/*/ebin" $(REBAR) eunit
     
 clean:
 	$(REBAR) clean
