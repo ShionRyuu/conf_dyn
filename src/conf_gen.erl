@@ -32,6 +32,11 @@
     generate_file/1
 ]).
 
+%% 
+-export([
+    output_source/3
+]).
+
 %% @doc 并行生成
 parallel_generate(Maps) ->
     MaxWorker = erlang:system_info(logical_processors_available),
@@ -43,22 +48,6 @@ parallel_generate(Maps) ->
              start_worker(Jobs, self(), Ref)
          end || Jobs <- JobList, Jobs =/= []],
     do_wait_worker(length(Pids), Ref).
-
-%% @doc 等待结果, adapted from mmake
-do_wait_worker(0, _Ref) ->
-    ok;
-do_wait_worker(N, Ref) ->
-    receive
-        {ack, Ref} ->
-            do_wait_worker(N - 1, Ref);
-        {error, Error, Ref} ->
-            throw({error, Error});
-        {'EXIT', _P, _Reason} ->
-            do_wait_worker(N, Ref);
-        _Other ->
-            io:format("receive unknown msg:~p~n", [_Other]),
-            do_wait_worker(N, Ref)
-    end.
 
 %% @doc 启动worker进程
 start_worker(Jobs, Parent, Ref) ->
@@ -74,6 +63,22 @@ start_worker(Jobs, Parent, Ref) ->
          end || Map <- Jobs],
         Parent ! {ack, Ref}
     end).
+
+%% @doc 等待结果, adapted from mmake
+do_wait_worker(0, _Ref) ->
+    ok;
+do_wait_worker(N, Ref) ->
+    receive
+        {ack, Ref} ->
+            do_wait_worker(N - 1, Ref);
+        {error, Error, Ref} ->
+            throw({error, Error});
+        {'EXIT', _P, _Reason} ->
+            do_wait_worker(N, Ref);
+        _Other ->
+            error_logger:info_msg("receive unknown msg:~p~n", [_Other]),
+            do_wait_worker(N, Ref)
+    end.
 
 %% @doc 将L分割成最多包含N个子列表的列表
 do_split_list(L, N) ->
@@ -92,37 +97,68 @@ do_split_list(L, N, Acc) ->
 generate_file(Map) ->
     #conf_map{name = ConfName, path = RelPath, type = MapType} = Map,
     case file:path_consult([conf_util:get_config_dir()], RelPath) of
-        {ok, TermList, FullName} ->
-            output_file(TermList, ConfName, FullName, MapType);
+        {ok, TermList, _FullName} ->
+            error_logger:info_msg("generate config ~w succeed~n", [ConfName]),
+            output_file(TermList, ConfName, MapType);
         {error, Error} ->
+            error_logger:info_msg("generate config ~w failed: ~w~n", [ConfName, Error]),
             {error, Error}
     end.
 
-%% @doc 生成Erl文件
-output_file(TermList, ConfName, FullName, MapType) ->
-    Content = get_source(TermList, ConfName, MapType),
-    case catch dynamic_compile:from_string(Content) of
-        {_, Bin} ->
-            %% 写.beam文件
-            Path = conf_util:get_beam_path(ConfName),
-            file:write_file(Path, Bin, [write, binary]),
-            %% 加载
-            code:load_binary(ConfName, FullName, Bin),
-            ok;
-        {_, _, Error} ->
-            {error, Error}
-    end.
+%% @doc 生成.beam文件
+output_file(TermList, ConfName, MapType) ->
+    Forms = get_form(TermList, ConfName, MapType),
+    {ok, _, Bytes, _Warnings} = compile:forms(Forms, [return]),
+    ErlPath = conf_util:get_beam_path(ConfName),
+    file:write_file(ErlPath, Bytes),
+    ok.
 
-%% @doc 构造源代码
-get_source(TermList, ConfName, MapType) ->
+%% @doc 生成.erl文件
+output_source(TermList, ConfName, MapType) ->
+    Forms = get_form(TermList, ConfName, MapType),
+    ErlPath = conf_util:get_src_path(ConfName),
+    file:write_file(ErlPath, erl_prettypr:format(erl_syntax:form_list(Forms))),
+    ok.
+
+%% @doc
+get_form(TermList, ConfName, MapType) ->
     Dic = get_dict(TermList, MapType),
-%%     Default = if MapType =:= set -> undefined; ture -> [] end,
-    format("-module(~w).~n-export([get/1, list/0]).~n~sget(_) -> undefined.~nlist() -> ~w.~n", [
-        ConfName, [io_lib:format("get(~w) -> ~w;~n", [Key, Val]) || {Key, Val} <- dict:to_list(Dic)], TermList]).
+    List = dict:to_list(Dic),
+    %% load template beam
+    FantasyBeamFile = code:where_is_file("fantasy.beam"),
+    {ok, {_, [{abstract_code, {_, Forms}}]}} = beam_lib:chunks(FantasyBeamFile, [abstract_code]),
+    filter_form(Forms, List, ConfName, []).
 
-%% @doc 格式化
-format(Temp, Content) ->
-    lists:flatten(io_lib:format(Temp, Content)).
+%% @doc
+filter_form([], _TermList, _ConfName, Acc) ->
+    lists:reverse(Acc);
+filter_form([{attribute, L, file, {_, _}} | Tail], TermList, ConfName, Acc) ->
+    filter_form(Tail, TermList, ConfName, [{attribute, L, file, {atom_to_list(ConfName) ++ ".erl", L}} | Acc]);
+filter_form([{attribute, L, module, _} | Tail], TermList, ConfName, Acc) ->
+    filter_form(Tail, TermList, ConfName, [{attribute, L, module, ConfName} | Acc]);
+filter_form([{attribute, _, export, _} = Export | Tail], TermList, ConfName, Acc) ->
+    filter_form(Tail, TermList, ConfName, [Export | Acc]);
+filter_form([{function, L, get, 1, [CatchAll]} | Tail], TermList, ConfName, Acc) ->
+    ClauseList = expand_get_function(TermList, CatchAll, []),
+    filter_form(Tail, TermList, ConfName, [{function, L, get, 1, ClauseList} | Acc]);
+filter_form([{function, L, list, 0, [DefaultClause]} | Tail], TermList, ConfName, Acc) ->
+    ClauseList = expand_list_function(TermList, DefaultClause),
+    filter_form(Tail, TermList, ConfName, [{function, L, list, 0, ClauseList} | Acc]);
+filter_form([_ | Tail], TermList, ConfName, Acc) ->
+    filter_form(Tail, TermList, ConfName, Acc).
+
+%% @doc
+expand_get_function([], CatchAll, Acc) ->
+    lists:reverse([CatchAll | Acc]);
+expand_get_function([{Key, Val} | Tail], CatchAll, Acc) ->
+    {clause, L, _, _, _} = CatchAll,
+    Clause = {clause, L, [erl_parse:abstract(Key)], [], [erl_parse:abstract(Val)]},
+    expand_get_function(Tail, CatchAll, [Clause | Acc]).
+
+%% @doc
+expand_list_function(TermList, DefaultClause) ->
+    {clause, L, _, _, _} = DefaultClause,
+    [{clause, L, [], [], [erl_parse:abstract(TermList)]}].
 
 %% @doc 解析
 get_dict(TermList, MapType) ->

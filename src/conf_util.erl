@@ -29,6 +29,7 @@
     get_config_dir/0,
     get_config_path/1,
     get_beam_path/1,
+    get_src_path/1,
     get_conf_map/0
 ]).
 
@@ -55,6 +56,18 @@ get_beam_dir() ->
 get_beam_path(ConfName) ->
     BeamDir = get_beam_dir(),
     filename:join([BeamDir, erlang:atom_to_list(ConfName) ++ ".beam"]).
+
+%% @doc .beam文件目录
+get_src_dir() ->
+    case application:get_env(conf_dyn, src_dir) of
+        {ok, Path} -> Path;
+        _ -> "."
+    end.
+
+%% @doc .erl文件路径
+get_src_path(ConfName) ->
+    SrcDir = get_src_dir(),
+    filename:join([SrcDir, erlang:atom_to_list(ConfName) ++ ".erl"]).
 
 %% @doc 配置映射表
 get_conf_map() ->

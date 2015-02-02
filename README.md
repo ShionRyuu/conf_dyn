@@ -2,8 +2,6 @@
 
 [![Build Status](https://secure.travis-ci.org/ShionRyuu/conf_dyn.png?branch=master)](http://travis-ci.org/ShionRyuu/conf_dyn)
 
-conf_dyn use dynamic_compile to generate beam file from erlang consult file.
-
 ## Usage
 
 ```sh
