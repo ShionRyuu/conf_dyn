@@ -125,7 +125,7 @@ get_form(TermList, ConfName, MapType) ->
     Dic = get_dict(TermList, MapType),
     List = dict:to_list(Dic),
     %% load template beam
-    FantasyBeamFile = code:where_is_file("fantasy.beam"),
+    FantasyBeamFile = code:where_is_file("conf_temp.beam"),
     {ok, {_, [{abstract_code, {_, Forms}}]}} = beam_lib:chunks(FantasyBeamFile, [abstract_code]),
     filter_form(Forms, List, ConfName, []).
 
