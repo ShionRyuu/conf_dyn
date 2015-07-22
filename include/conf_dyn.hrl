@@ -26,9 +26,9 @@
 -define(FOREACH(Fun, List), lists:foreach(fun(E) -> Fun(E) end, List)).
 
 %% 获取配置
--define(CONF_FIND(Conf, Key), Conf:get(Key)).
+-define(CONF_FIND(Conf, Key), Conf:find(Key)).
 -define(CONF_LIST(Conf, Key), Conf:list(Key)).
--define(CONF_DEFAULT(Conf, Key, Default), case Conf:get(Key) of undefined -> Default; V -> V end).
+-define(CONF_DEFAULT(Conf, Key, Default), Conf:find(Key, Default)).
 
 %% @doc 格式{配置名, 配置路径, 格式[kv_con, kv_list, rec_con, rec_list]}
 -record(conf_map, {name, path, type = kv_con}).

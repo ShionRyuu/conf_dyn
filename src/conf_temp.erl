@@ -24,10 +24,13 @@
 -module(conf_temp).
 
 -export([
-	get/1,
+	find/1,
+	find/2,
 	list/0
 ]).
 
-get(_) -> undefined.
+find(_) -> undefined.
+
+find(K, D) -> case find(K) of undefined -> D; V -> V end.
 
 list() -> [].

@@ -44,7 +44,7 @@
 
 %% @doc 获取配置
 find(Conf, Key) ->
-    case Conf:get(Key) of
+    case Conf:find(Key) of
         undefined ->
             [];
         V ->

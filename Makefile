@@ -4,7 +4,7 @@ REBAR=$(PWD)/rebar
 
 all: compile config
 
-config:
+config: compile
 	@erl -noshell -pa ./ebin -pa ./deps/*/ebin -s conf_dyn reload_all -s init stop
 
 compile: deps

@@ -10,7 +10,7 @@ $erl -pa ./ebin -pa ./deps/*/ebin -root_dir `pwd`
 ok
 2> conf_dyn:find(mora, invite_times).
 [5]
-3> mora:get(invite_times).
+3> mora:find(invite_times).
 5
 4> conf_dyn:list(mora).
 [{invite_times,5},{gain_times,10}]
@@ -18,7 +18,7 @@ ok
 [{invite_times,5},{gain_times,10}]
 6> conf_dyn:find(mora, not_exist_key).
 []
-7> mora:get(not_exist_key).
+7> mora:find(not_exist_key).
 undefined
 ```
 

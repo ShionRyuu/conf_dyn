@@ -138,22 +138,22 @@ filter_form([{attribute, L, module, _} | Tail], TermList, ConfName, Acc) ->
     filter_form(Tail, TermList, ConfName, [{attribute, L, module, ConfName} | Acc]);
 filter_form([{attribute, _, export, _} = Export | Tail], TermList, ConfName, Acc) ->
     filter_form(Tail, TermList, ConfName, [Export | Acc]);
-filter_form([{function, L, get, 1, [CatchAll]} | Tail], TermList, ConfName, Acc) ->
-    ClauseList = expand_get_function(TermList, CatchAll, []),
-    filter_form(Tail, TermList, ConfName, [{function, L, get, 1, ClauseList} | Acc]);
+filter_form([{function, L, find, 1, [CatchAll]} | Tail], TermList, ConfName, Acc) ->
+    ClauseList = expand_find_function(TermList, CatchAll, []),
+    filter_form(Tail, TermList, ConfName, [{function, L, find, 1, ClauseList} | Acc]);
 filter_form([{function, L, list, 0, [DefaultClause]} | Tail], TermList, ConfName, Acc) ->
     ClauseList = expand_list_function(TermList, DefaultClause),
     filter_form(Tail, TermList, ConfName, [{function, L, list, 0, ClauseList} | Acc]);
-filter_form([_ | Tail], TermList, ConfName, Acc) ->
-    filter_form(Tail, TermList, ConfName, Acc).
+filter_form([T | Tail], TermList, ConfName, Acc) ->
+    filter_form(Tail, TermList, ConfName, [T|Acc]).
 
 %% @doc
-expand_get_function([], CatchAll, Acc) ->
+expand_find_function([], CatchAll, Acc) ->
     lists:reverse([CatchAll | Acc]);
-expand_get_function([{Key, Val} | Tail], CatchAll, Acc) ->
+expand_find_function([{Key, Val} | Tail], CatchAll, Acc) ->
     {clause, L, _, _, _} = CatchAll,
     Clause = {clause, L, [erl_parse:abstract(Key)], [], [erl_parse:abstract(Val)]},
-    expand_get_function(Tail, CatchAll, [Clause | Acc]).
+    expand_find_function(Tail, CatchAll, [Clause | Acc]).
 
 %% @doc
 expand_list_function(TermList, DefaultClause) ->

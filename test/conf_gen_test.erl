@@ -34,9 +34,9 @@
 conf_gen_test() ->
     %% run in .eunit
     %%?assertEqual(conf_dyn:reload_config(mora), ok),
-    ?assertEqual(mora:get(invite_times), 5),
-    ?assertEqual(mora:get(gain_times), 10),
-    ?assertEqual(mora:get(not_exist_key), undefined),
+    ?assertEqual(mora:find(invite_times), 5),
+    ?assertEqual(mora:find(gain_times), 10),
+    ?assertEqual(mora:find(not_exist_key), undefined),
     ?assertEqual(conf_dyn:find(mora, invite_times), [5]),
     ?assertEqual(conf_dyn:find(mora, gain_times), [10]),
     ?assertEqual(conf_dyn:find(mora, not_exist_key), []),
