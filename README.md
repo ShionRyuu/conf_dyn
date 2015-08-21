@@ -53,6 +53,6 @@ $ERL_FLAGS="-pa ./ebin -pa ./deps/*/ebin -root_dir `pwd`" rebar compile eunit
 
 - Shion Ryuu <shionryuu@outlook.com>
 
-## Todo
+## License
 
-
+  [`The MIT License (MIT)`](http://shionryuu.mit-license.org/)
